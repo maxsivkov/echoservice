@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . ./
 RUN dotnet restore
 RUN dotnet publish -c Release -o out
-RUN ls -la out
+REM RUN ls -la out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0

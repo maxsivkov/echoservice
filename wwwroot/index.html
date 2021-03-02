@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>demo</title>
+    <script src="config.js"></script>
+</head>
+
+<body>
+    <script>
+        var logger;
+        function log() {
+            logger.value = logger.value + (logger.value ? '\n\n' : '') + (new Date());
+
+            for (var i = 0; i < arguments.length; i++) {
+                let val = arguments[i]
+                if (typeof val === 'object') {
+                    val = JSON.stringify(val, null, ' ');
+                }
+                logger.value = logger.value + '\n' + val;
+            }
+        }
+        document.addEventListener("DOMContentLoaded", async function () {
+            logger = document.querySelector('#log')
+            document.querySelector('#token').value = app_config.token;
+
+            console.log(app_config);
+            document.querySelector('#public_forecast').addEventListener("click", async function (e) {
+                let response = await fetch('/api/forecast');
+                if (response.ok) {
+                    let json = await response.json();
+                    log('GET Forecast', json);
+                } else {
+                    log('ERROR GET Forecast', response.status);
+                }
+                
+            });
+
+            document.querySelector('#public_echo').addEventListener("click", async function (e) {
+                let response = await fetch('/api/echo');
+                if (response.ok) {
+                    let json = await response.json();
+                    log('GET Echo', json);
+                } else {
+                    log('ERROR GET Echo', response.status);
+                }
+
+            });
+
+            document.querySelector('#protected_forecast').addEventListener("click", async function (e) {
+                let headers = {}
+                let token = document.querySelector('#token').value;
+                if (token && token.length > 0) {
+                    headers = {
+                        'Authorization': 'Bearer ' + token
+                    };
+                }
+                let response = await fetch('/api/forecast', { method: 'PUT', headers: headers });
+                if (response.ok) {
+                    let json = await response.json();
+                    log('PUT Forecast', json);
+                } else {
+                    log('ERROR PUT Forecast', response.status);
+                }
+
+            });
+
+        });
+    </script>
+    <div id="container">
+        <img src="test-logo.png" style="width:50%" />
+        <h2>Public methods</h2>
+        <button id="public_forecast">PUBLIC - Forecast</button>
+        <button id="public_echo">PUBLIC - Echo</button><br />
+        <br />
+        <h2>Protected methods</h2>
+        <textarea id="token" rows="2" cols="50" placeholder="Token"></textarea><br />
+        <button id="protected_forecast">PROTECTED - Forecast</button><br />
+        <hr />
+        <p>Log&nbsp;&nbsp;<button onclick="document.querySelector('#log').value=''">clear</button></p>
+        <textarea id="log" rows="100" style="display: inline-block; vertical-align: bottom; width: 100%"></textarea>
+    </div>
+</body>
+</html>
