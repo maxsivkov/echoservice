@@ -20,62 +20,60 @@
                 logger.value = logger.value + '\n' + val;
             }
         }
+
+        async function api_call(path, method, protected) {
+            let headers = {}
+            if (protected) {
+                let use_token = document.querySelector('#use_token').checked;
+                if (use_token) {
+                    let token = document.querySelector('#token').value;
+                    if (token && token.length > 0) {
+                        headers = {
+                            'Authorization': 'Bearer ' + token
+                        };
+                    }
+                }
+            }
+            let response = await fetch(path, { method: method, headers: headers });
+            if (response.ok) {
+                let json = await response.json();
+                log(`${method} ${path}`, json);
+            } else {
+                log(`ERROR ${method} ${path}`, response.status);
+            }
+        }
+
+        function api_call_event(e, path, method, protected) {
+            api_call(path, method, protected);
+        }
+
         document.addEventListener("DOMContentLoaded", async function () {
             logger = document.querySelector('#log')
             document.querySelector('#token').value = app_config.token;
 
             console.log(app_config);
-            document.querySelector('#public_forecast').addEventListener("click", async function (e) {
-                let response = await fetch('/api/forecast');
-                if (response.ok) {
-                    let json = await response.json();
-                    log('GET Forecast', json);
-                } else {
-                    log('ERROR GET Forecast', response.status);
-                }
-                
-            });
-
-            document.querySelector('#public_echo').addEventListener("click", async function (e) {
-                let response = await fetch('/api/echo');
-                if (response.ok) {
-                    let json = await response.json();
-                    log('GET Echo', json);
-                } else {
-                    log('ERROR GET Echo', response.status);
-                }
-
-            });
-
-            document.querySelector('#protected_forecast').addEventListener("click", async function (e) {
-                let headers = {}
-                let token = document.querySelector('#token').value;
-                if (token && token.length > 0) {
-                    headers = {
-                        'Authorization': 'Bearer ' + token
-                    };
-                }
-                let response = await fetch('/api/forecast', { method: 'PUT', headers: headers });
-                if (response.ok) {
-                    let json = await response.json();
-                    log('PUT Forecast', json);
-                } else {
-                    log('ERROR PUT Forecast', response.status);
-                }
-
-            });
+            document.querySelector('#use_token').addEventListener("change", function (e) {
+                console.log(e);
+                document.querySelector('#token').disabled = !e.target.checked
+            })
+            document.querySelector('#public_forecast').addEventListener("click", e => api_call_event(e, '/api/forecast', 'GET'));
+            document.querySelector('#public_public').addEventListener("click", e => api_call_event(e, '/api/public', 'GET'));
+            document.querySelector('#protected_forecast').addEventListener("click", e => api_call_event(e, '/api/forecast', 'PUT', true));
+            document.querySelector('#protected_protected').addEventListener("click", e => api_call_event(e, '/api/protected', 'GET', true));
+            
 
         });
     </script>
     <div id="container">
         <img src="test-logo.png" style="width:50%" />
         <h2>Public methods</h2>
-        <button id="public_forecast">PUBLIC - Forecast</button>
-        <button id="public_echo">PUBLIC - Echo</button><br />
+        <button id="public_forecast">PUBLIC - Forecast GET</button>
+        <button id="public_public">PUBLIC - public echo</button><br />
         <br />
         <h2>Protected methods</h2>
-        <textarea id="token" rows="2" cols="50" placeholder="Token"></textarea><br />
-        <button id="protected_forecast">PROTECTED - Forecast</button><br />
+        <input type="checkbox" id="use_token" checked/> <textarea id="token" rows="2" cols="50" placeholder="Token"></textarea><br />
+        <button id="protected_forecast">PROTECTED - Forecast PUT</button>
+        <button id="protected_protected">PROTECTED - protected echo GET</button><br />
         <hr />
         <p>Log&nbsp;&nbsp;<button onclick="document.querySelector('#log').value=''">clear</button></p>
         <textarea id="log" rows="100" style="display: inline-block; vertical-align: bottom; width: 100%"></textarea>

@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace DemoWebApp.Controllers
 {
-    [ApiController]
-    [Route("/api/[controller]")]
-    public class EchoController : Controller
+    public class EchoBase : ControllerBase
     {
         [HttpGet]
         public JsonResult Get() => new JsonResult( new
         {
             ServerDate = DateTime.Now,
+            Path = HttpContext.Request.Path,
+            Method = HttpContext.Request.Method,
             Headers = HttpContext.Request.Headers.ToDictionary(x => x.Key, x => x.Value.ToString()),
             QueryParams = HttpContext.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString()),
             FormParams = HttpContext.Request.HasFormContentType ? HttpContext.Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString()) : new Dictionary<string, string>(),

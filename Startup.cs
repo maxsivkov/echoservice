@@ -73,6 +73,7 @@ namespace DemoWebApp
                     OnAuthenticationFailed = context =>
                     {
                         var exc = context.Exception;
+                        Console.WriteLine(exc.Message);
                         return Task.CompletedTask;
                     }
                 };
