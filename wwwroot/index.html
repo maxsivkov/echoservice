@@ -34,10 +34,12 @@
                     }
                 }
             }
+            let start = Date.now();
             let response = await fetch(path, { method: method, headers: headers });
+            let elapsed = Date.now() - start;
             if (response.ok) {
                 let json = await response.json();
-                log(`${method} ${path}`, json);
+                log(`${method} ${path} in ${elapsed} ms`, json);
             } else {
                 log(`ERROR ${method} ${path}`, response.status);
             }
