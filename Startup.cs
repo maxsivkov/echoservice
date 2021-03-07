@@ -124,7 +124,12 @@ namespace DemoWebApp
             app.UseDefaultFiles();
             // uncomment if you want to support static files
             app.UseStaticFiles();
-            
+
+            app.Use(async (context, next) => {
+                context.Request.EnableBuffering();
+                await next();
+            });
+
             var configJson = JsonConvert.SerializeObject(new
             {
                 authority = Configuration.GetValue<string>("Authority"),
