@@ -35,11 +35,8 @@ namespace DemoWebApp.Controllers
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        if (request.Body.CanRead)
-                        {
-                            await request.Body.CopyToAsync(ms);
-                            bodyLen = ms.Position;
-                        }
+                        await request.Body.CopyToAsync(ms);
+                        bodyLen = ms.Position;
                     }
                 }
             }
