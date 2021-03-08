@@ -101,10 +101,19 @@ namespace DemoWebApp
             });
 
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            app.Use(async (context, next) => {
+                context.Request.EnableBuffering();
+                await next();
+            });
+            long requestCount = 0;
+            app.Use(async (context, next) => {
+                await next();
+                logger.LogInformation("{}: {} req_len:{} -> resp_len:{}", ++requestCount, context.Request.Path, context.Request.ContentLength, context.Response.ContentLength);
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -125,10 +134,7 @@ namespace DemoWebApp
             // uncomment if you want to support static files
             app.UseStaticFiles();
 
-            app.Use(async (context, next) => {
-                context.Request.EnableBuffering();
-                await next();
-            });
+            
 
             var configJson = JsonConvert.SerializeObject(new
             {
